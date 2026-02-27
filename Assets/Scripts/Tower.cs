@@ -4,11 +4,11 @@ public class Tower : MonoBehaviour
 {
     [Header("Combat")]
     public GameObject projectilePrefab;
-    public float fireRate = 1f;       // Shots per second
-    public float range = 6f;          // Detection radius
+    public float fireRate = 1f;     // Shots per second
+    public float range = 6f;        // Detection radius
 
     [Header("Visuals")]
-    public Transform turretPivot;     // Child object that rotates to face enemies
+    public Transform turretPivot;   // Child object that rotates to face enemies
 
     private float _fireCooldown;
 
@@ -20,7 +20,6 @@ public class Tower : MonoBehaviour
 
         if (target != null)
         {
-            // Rotate turret to face the target
             if (turretPivot != null)
             {
                 Vector2 dir = target.position - turretPivot.position;
@@ -28,7 +27,6 @@ public class Tower : MonoBehaviour
                 turretPivot.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
             }
 
-            // Shoot
             if (_fireCooldown <= 0f)
             {
                 Shoot(target);
@@ -39,7 +37,6 @@ public class Tower : MonoBehaviour
 
     private Transform FindNearestEnemy()
     {
-        // Find all enemies in the scene
         Enemy[] enemies = FindObjectsByType<Enemy>(FindObjectsSortMode.None);
 
         Transform nearest = null;
@@ -47,6 +44,7 @@ public class Tower : MonoBehaviour
 
         foreach (Enemy e in enemies)
         {
+            // Include enemies already at the tower wall — they are within range by definition
             float dist = Vector2.Distance(transform.position, e.transform.position);
             if (dist <= range && dist < minDist)
             {
@@ -62,18 +60,14 @@ public class Tower : MonoBehaviour
     {
         if (projectilePrefab == null) return;
 
-        // Spawn from turret pivot (or tower center if no pivot)
         Vector3 spawnPos = turretPivot != null ? turretPivot.position : transform.position;
         GameObject projGO = Instantiate(projectilePrefab, spawnPos, Quaternion.identity);
 
         Projectile proj = projGO.GetComponent<Projectile>();
         if (proj != null)
-        {
             proj.SetTarget(target);
-        }
     }
 
-    // Draw range gizmo in the editor
     private void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.cyan;
